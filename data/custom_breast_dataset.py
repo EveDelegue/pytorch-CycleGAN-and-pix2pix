@@ -35,7 +35,7 @@ class CustombreastDataset(BaseDataset):
             the modified parser.
         """
         parser.add_argument('--new_dataset_option', type=float, default=1.0, help='new dataset option')
-        parser.set_defaults(max_dataset_size=2000, new_dataset_option=2.0,model='pix2pix',input_nc=1, output_nc=1,dataset_mode='unaligned',load_size=512, crop_size=512,display_winsize=512, display_freq=50, display_ncols=6, print_freq=100, save_latest_freq=100, num_threads=1)  # specify dataset-specific default values
+        parser.set_defaults(max_dataset_size=2000, new_dataset_option=2.0,model='pix2pix',input_nc=1, output_nc=1,dataset_mode='unaligned',load_size=512, crop_size=512,display_winsize=256, display_freq=50, display_ncols=6, print_freq=100, save_latest_freq=100, num_threads=1)  # specify dataset-specific default values
         return parser
 
     def __init__(self, opt):

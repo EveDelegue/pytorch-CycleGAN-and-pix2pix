@@ -33,7 +33,8 @@ from models import create_model
 from util.visualizer import save_images
 from util import html
 import matplotlib.pyplot as plt
-from metrics.metrics_eve import lpips_score,l2_score
+from metrics.metrics_eve import lpips_score,l2_score,ssim_score
+import numpy as np
 
 try:
     import wandb
@@ -68,8 +69,10 @@ if __name__ == '__main__':
     # For [pix2pix]: we use batchnorm and dropout in the original pix2pix. You can experiment it with and without eval() mode.
     # For [CycleGAN]: It should not affect CycleGAN as CycleGAN uses instancenorm without dropout.
 
-    Lpips_list = []
-    L2_list = []
+    Lpips_list = np.array([])
+    L2_list = np.array([])
+    ssim_list = np.array([])
+
     if opt.eval:
         model.eval()
     for i, data in enumerate(dataset):
@@ -89,18 +92,22 @@ if __name__ == '__main__':
 
         #saving metrics
         #lpips
-        Lpips_list.append(lpips_score(Bim,truthim))
+        Lpips_list = np.append(Lpips_list, lpips_score(Bim,truthim))
         #L2
-        L2_list.append(l2_score(Bim,truthim)/200)
-    
-    plt.figure(1)
-    plt.plot(Lpips_list,label='lpips')
-    plt.plot(L2_list,label='L2/200')
-    plt.title('metrics on test samples')
-    plt.xlabel('image number')
-    plt.ylabel('scores')
-    plt.legend()
-    plt.show()
+        L2_list = np.append(L2_list, l2_score(Bim,truthim)/200)
+        #ssim
+        ssim_list = np.append(ssim_list, ssim_score(Bim,truthim))
 
-    plt.savefig('metrics.png')
+    #plt.figure(1)
+    #plt.plot(Lpips_list,label='lpips')
+    #plt.plot(L2_list,label='L2/200')
+    #plt.plot(ssim_list,label = '1-ssim')
+    #plt.title('metrics on test samples')
+    #plt.xlabel('image number')
+    #plt.ylabel('scores')
+    #plt.legend()
+    #plt.show()
+
+    #plt.savefig('metrics.png')
     webpage.save()  # save the HTML
+    print(' mean L2: ' + str(L2_list.mean()) + ' mean LPIPS: ' + str(Lpips_list.mean()) + ' mean SSIM: ' + str(ssim_list.mean()))
