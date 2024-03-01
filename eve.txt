@@ -1,0 +1,2 @@
+python3 train.py --dataroot ./datasets/breasts --name breasts_pix2pix --model pix2pix --direction AtoB --dataset_mode custom_breast --gpu_ids 0
+

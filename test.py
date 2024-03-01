@@ -32,6 +32,8 @@ from data import create_dataset
 from models import create_model
 from util.visualizer import save_images
 from util import html
+import matplotlib.pyplot as plt
+from metrics.metrics_eve import lpips_score,l2_score
 
 try:
     import wandb
@@ -65,6 +67,9 @@ if __name__ == '__main__':
     # test with eval mode. This only affects layers like batchnorm and dropout.
     # For [pix2pix]: we use batchnorm and dropout in the original pix2pix. You can experiment it with and without eval() mode.
     # For [CycleGAN]: It should not affect CycleGAN as CycleGAN uses instancenorm without dropout.
+
+    Lpips_list = []
+    L2_list = []
     if opt.eval:
         model.eval()
     for i, data in enumerate(dataset):
@@ -77,4 +82,25 @@ if __name__ == '__main__':
         if i % 5 == 0:  # save images to an HTML file
             print('processing (%04d)-th image... %s' % (i, img_path))
         save_images(webpage, visuals, img_path, aspect_ratio=opt.aspect_ratio, width=opt.display_winsize, use_wandb=opt.use_wandb)
+        #splitting the images
+        Aim = tuple(visuals.values())[0].squeeze().cpu() #input
+        Bim = tuple(visuals.values())[1].squeeze().cpu() #output
+        truthim = tuple(visuals.values())[2].squeeze().cpu() #ground truth
+
+        #saving metrics
+        #lpips
+        Lpips_list.append(lpips_score(Bim,truthim))
+        #L2
+        L2_list.append(l2_score(Bim,truthim)/200)
+    
+    plt.figure(1)
+    plt.plot(Lpips_list,label='lpips')
+    plt.plot(L2_list,label='L2/200')
+    plt.title('metrics on test samples')
+    plt.xlabel('image number')
+    plt.ylabel('scores')
+    plt.legend()
+    plt.show()
+
+    plt.savefig('metrics.png')
     webpage.save()  # save the HTML
